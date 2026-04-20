@@ -538,6 +538,14 @@
 			ba_8_13: { width: 476, height: 318 },
 			ba_8_4: { width: 476, height: 318 }
 		};
+		const DATE_LAYOUT = {
+			horizontalPadding: 8,
+			labelPadding: 14,
+			activeStatePadding: 4,
+			verticalPadding: 64
+		};
+		const dateMeasureCanvas = document.createElement("canvas");
+		const dateMeasureContext = dateMeasureCanvas.getContext("2d");
 
 		let selectedRoom = "";
 		let selectedDateId = "";
@@ -629,14 +637,86 @@
 			});
 		}
 
+		function getRoomDateBaseFontSize() {
+			const rootStyles = getComputedStyle(document.documentElement);
+			const value = parseFloat(rootStyles.getPropertyValue("--room-date-size"));
+			if (Number.isFinite(value) && value > 0) {
+				return value;
+			}
+
+			return 19;
+		}
+
+		function measureDateLabelWidth(label, baseFontSize) {
+			if (!dateMeasureContext) {
+				return 60;
+			}
+
+			dateMeasureContext.font = "400 " + baseFontSize + "px \"EB Garamond\", serif";
+			const regularWidth = dateMeasureContext.measureText(label).width;
+
+			dateMeasureContext.font = "700 " + baseFontSize + "px \"Helvetica\", \"Arial\", sans-serif";
+			const activeWidth = dateMeasureContext.measureText(label).width;
+
+			return Math.ceil(Math.max(regularWidth, activeWidth) + DATE_LAYOUT.labelPadding + DATE_LAYOUT.activeStatePadding);
+		}
+
+		function getDateLayout(dateItems) {
+			const baseFontSize = getRoomDateBaseFontSize();
+			const wrapWidth = Math.max(1, Math.floor(datesWrap.getBoundingClientRect().width));
+			let minX = Infinity;
+			let maxRight = -Infinity;
+			let maxY = 0;
+			const labelWidthsById = {};
+
+			dateItems.forEach((item) => {
+				const label = item.text || item.label || "";
+				const labelWidth = measureDateLabelWidth(label, baseFontSize);
+				labelWidthsById[item.id] = labelWidth;
+
+				if (item.x < minX) {
+					minX = item.x;
+				}
+
+				const rightEdge = item.x + labelWidth;
+				if (rightEdge > maxRight) {
+					maxRight = rightEdge;
+				}
+
+				if (item.y > maxY) {
+					maxY = item.y;
+				}
+			});
+
+			const contentWidth =
+				(maxRight - minX) +
+				(DATE_LAYOUT.horizontalPadding * 2);
+			const scale = Math.min(1, wrapWidth / contentWidth);
+			const canvasWidth = Math.ceil(contentWidth * scale);
+			const centerOffset = Math.max(0, Math.floor((wrapWidth - canvasWidth) / 2));
+
+			return {
+				baseFontSize,
+				scale,
+				minX,
+				centerOffset,
+				labelWidthsById,
+				canvasWidth,
+				canvasHeight: Math.ceil((maxY + DATE_LAYOUT.verticalPadding) * scale)
+			};
+		}
+
 		function renderDates(roomName) {
 			const roomInfo = ROOM_DATA[roomName];
 			const dateItems = roomInfo.dates;
-			let maxY = 0;
+			datesWrap.classList.remove("hidden");
+			const layout = getDateLayout(dateItems);
 
 			datesCanvas.innerHTML = "";
 			datesCanvas.className = "dates-canvas room-" + roomName.replace(/\s+/g, "-");
-			datesWrap.classList.remove("hidden");
+			datesCanvas.style.width = layout.canvasWidth + "px";
+			datesCanvas.style.height = layout.canvasHeight + "px";
+			datesCanvas.style.marginLeft = layout.centerOffset + "px";
 
 			dateItems.forEach((item) => {
 				const dateBtn = document.createElement("button");
@@ -644,8 +724,11 @@
 				dateBtn.className = "date-btn";
 				dateBtn.textContent = item.text || item.label;
 				dateBtn.dataset.dateId = item.id;
-				dateBtn.style.setProperty("--date-x", item.x + "px");
-				dateBtn.style.setProperty("--date-y", item.y + "px");
+				dateBtn.style.left =
+					((item.x - layout.minX + DATE_LAYOUT.horizontalPadding) * layout.scale) + "px";
+				dateBtn.style.top = (item.y * layout.scale) + "px";
+				dateBtn.style.fontSize = (layout.baseFontSize * layout.scale) + "px";
+				dateBtn.style.minWidth = (layout.labelWidthsById[item.id] * layout.scale) + "px";
 
 				dateBtn.addEventListener("click", () => {
 					selectedDateId = item.id;
@@ -654,10 +737,11 @@
 				});
 
 				datesCanvas.appendChild(dateBtn);
-				maxY = Math.max(maxY, item.y);
 			});
 
-			datesCanvas.style.height = maxY + 64 + "px";
+			if (selectedDateId) {
+				updateDateButtonState();
+			}
 		}
 
 		function updateDateButtonState() {
@@ -730,24 +814,28 @@
 				mediaRevealObserver.disconnect();
 			}
 
-			mediaRevealObserver = new IntersectionObserver(
-				(entries) => {
-					entries.forEach((entry) => {
-						if (entry.isIntersecting) {
-							mediaWrap.classList.add("is-visible");
-						} else {
-							mediaWrap.classList.remove("is-visible");
-						}
-					});
-				},
-				{
-					root: null,
-					threshold: 0.22,
-					rootMargin: "0px 0px -12% 0px"
-				}
-			);
+			if ("IntersectionObserver" in window) {
+				mediaRevealObserver = new IntersectionObserver(
+					(entries) => {
+						entries.forEach((entry) => {
+							if (entry.isIntersecting) {
+								mediaWrap.classList.add("is-visible");
+							} else {
+								mediaWrap.classList.remove("is-visible");
+							}
+						});
+					},
+					{
+						root: null,
+						threshold: 0.22,
+						rootMargin: "0px 0px -12% 0px"
+					}
+				);
 
-			mediaRevealObserver.observe(mediaWrap);
+				mediaRevealObserver.observe(mediaWrap);
+			} else {
+				mediaWrap.classList.add("is-visible");
+			}
 
 			const caption = document.createElement("p");
 			caption.className = "media-caption";
@@ -795,6 +883,30 @@
 			setHashPage("page2");
 			showPage("page2");
 		});
+
+		let datesResizeRafId = null;
+		window.addEventListener("resize", () => {
+			if (!selectedRoom) {
+				return;
+			}
+
+			if (datesResizeRafId !== null) {
+				cancelAnimationFrame(datesResizeRafId);
+			}
+
+			datesResizeRafId = requestAnimationFrame(() => {
+				datesResizeRafId = null;
+				renderDates(selectedRoom);
+			});
+		});
+
+		if (document.fonts && document.fonts.ready) {
+			document.fonts.ready.then(() => {
+				if (selectedRoom) {
+					renderDates(selectedRoom);
+				}
+			});
+		}
 
 		window.addEventListener("hashchange", syncPageByHash);
 

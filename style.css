@@ -7,8 +7,6 @@
 	--nav-size: 20px;
 	--date-size: 20px;
 	--room-date-size: clamp(17.2px, 1.25vw + 3px, 19px);
-	--dates-scale: 1;
-	--dates-shift-x: 0px;
 	--page-bg: #ffffff;
 	--placeholder-bg: #ffffff;
 	--placeholder-text: #525252;
@@ -17,6 +15,11 @@
 
 * {
 	box-sizing: border-box;
+}
+
+html {
+	-webkit-text-size-adjust: 100%;
+	text-size-adjust: 100%;
 }
 
 body {
@@ -116,6 +119,13 @@ body {
 	flex-wrap: wrap;
 }
 
+@supports not (gap: 1rem) {
+	.room-btn {
+		margin-right: 25px;
+		margin-bottom: 8px;
+	}
+}
+
 .room-btn {
 	border: 0;
 	background: transparent;
@@ -143,9 +153,8 @@ body {
 
 .dates-canvas {
 	position: relative;
-	width: 640px;
-	transform: scale(var(--dates-scale));
-	transform-origin: top left;
+	width: 100%;
+	max-width: 760px;
 	overflow: visible;
 }
 
@@ -163,7 +172,9 @@ body {
 	font-weight: 400;
 	line-height: 1;
 	color: #111;
-	transform: translateX(var(--dates-shift-x));
+	white-space: nowrap;
+	font-variant-numeric: tabular-nums;
+	-webkit-font-smoothing: antialiased;
 }
 
 .dates-canvas.room-bathroom .date-btn {
@@ -318,11 +329,6 @@ body {
 }
 
 @media (max-width: 1320px) {
-	:root {
-		--dates-shift-x: 56px;
-		--dates-scale: min(1, calc((100vw - 84px) / 760px));
-	}
-
 	.site {
 		width: 100%;
 		padding-left: 42px;
@@ -335,11 +341,6 @@ body {
 
 	.dates-wrap {
 		padding-left: 0;
-	}
-
-	.dates-canvas {
-		width: 760px;
-		max-width: none;
 	}
 
 	.media-image-slot {
@@ -362,8 +363,6 @@ body {
 @media (max-width: 760px) {
 	:root {
 		--page-top: 112px;
-		--dates-scale: min(1, calc((100vw - 48px) / 760px));
-		--room-date-size: calc(16px / var(--dates-scale));
 	}
 
 	.site {
@@ -394,13 +393,19 @@ body {
 		gap: 16px;
 	}
 
+	@supports not (gap: 1rem) {
+		.room-btn {
+			margin-right: 16px;
+		}
+	}
+
 	.room-btn,
 	.date-btn {
 		font-size: 16px;
 	}
 
 	.media-image-slot {
-		--media-left-mobile: calc(var(--media-left, 0px) * 0.42);
+		--media-left-mobile: clamp(8px, calc(var(--media-left, 0px) * 0.22), 88px);
 		width: min(var(--media-width, 397px), calc(100vw - 48px - var(--media-left-mobile)));
 		margin-left: var(--media-left-mobile);
 		height: auto;
