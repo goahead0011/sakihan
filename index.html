@@ -1,0 +1,805 @@
+<!doctype html>
+<html lang="ko">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Saki</title>
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400&display=swap" rel="stylesheet">
+	<link rel="stylesheet" href="./style.css">
+</head>
+<body>
+	<main class="site">
+		<section id="page-1" class="page active" aria-label="page 1">
+					<h1 class="main-title">No one's coming to Saki's house.</h1>
+			<button id="to-page-2" class="hero-trigger" type="button" aria-label="Go to text page">
+				<div class="image-slot hero-slot">
+					<img src="./imgs/main/main image.png" alt="Main garden image">
+				</div>
+			</button>
+		</section>
+
+		<section id="page-intro" class="page intro-page" aria-label="intro page">
+			<p id="intro-copy" class="media-caption intro-copy"></p>
+		</section>
+
+		<section id="page-2" class="page" aria-label="page 2">
+					<h1 id="to-page-1" class="main-title go-home">No one's coming to Saki's house.</h1>
+
+			<nav id="room-nav" class="room-nav" aria-label="room navigation"></nav>
+
+			<section id="dates-wrap" class="dates-wrap hidden" aria-label="date section">
+				<div id="dates-canvas" class="dates-canvas"></div>
+			</section>
+
+			<section id="media-wrap" class="media-wrap hidden" aria-label="media section"></section>
+		</section>
+	</main>
+
+	<script>
+		const ROOM_DATA = {
+			garden: {
+				dates: [
+					{ id: "g_5_28_a", label: "4/22", x: 20, y: 0 },
+					{ id: "g_10_11", label: "10/11", x: 102, y: 0 },
+					{ id: "g_2_14", label: "2/14", x: 214, y: 0 },
+					{ id: "g_5_26", label: "5/18", x: 315, y: 0 },
+					{ id: "g_7_8", label: "7/8", x: 466, y: 0 },
+					{ id: "g_5_27", label: "3/9", x: 58, y: 51 },
+					{ id: "g_6_4", label: "6/4", x: 158, y: 51 },
+					{ id: "g_1_13", label: "1/13", x: 242, y: 51 },
+					{ id: "g_10_13", label: "10/13", x: 384, y: 51 },
+					{ id: "g_10_10", label: "10/10", x: -31, y: 102 },
+					{ id: "g_7_6", label: "7/6", x: 81, y: 102 },
+					{ id: "g_1_15", label: "1/15", x: 203, y: 102 },
+					{ id: "g_9_6", label: "9/6", x: 294, y: 102 },
+					{ id: "g_1_18", label: "1/18", x: 56, y: 153 },
+					{ id: "g_5_28_b", label: "4/21", x: 510, y: 153 },
+					{ id: "g_5_29", label: "4/22", x: 242, y: 204 },
+					{ id: "g_5_30", label: "4/23", x: 394, y: 204 }
+				],
+				mediaByDate: {
+					default: {
+						image: { width: 397, height: 265, left: 200, top: 58 },
+						caption: { text: "", left: 72, top: 20 }
+					},
+					g_5_28_a: {
+						caption: { text: "음…… 빵 굽는 냄새." }
+					},
+					g_10_11: {
+						caption: { text: "맑은 날: Saki를 제외한 집 안에서의 신호, 없음." }
+					},
+					g_2_14: {
+						imageSrc: "./imgs/garden/2.14.png",
+						caption: { text: "이 집에서 몇십 년 동안 역할극을 한 거라면, 내가 맡은 역할은 아름다운 정원을 사방에 낀 주택에서 벌어지는 슬픈 일이었을 거야." }
+					},
+					g_5_26: {
+						caption: {
+							text: `‘가족’이란 단어는 꼭 야만적이고 우아한 몽둥이 같아.
+
+밖으로 나서려는 순간 나를 때려눕히는 경호원처럼 각이 잡혀 있어.
+
+오후 다섯 시부터 풀밭에 정자세로 누워 있었다. 크기가 맞지 않는 신발을 신고, 헐떡이며 저녁이 오는 걸 보았지. 저녁이 벗어 놓고 간 양말 뒤축에 검은 피가 굳어 있다.`
+						}
+					},
+					g_7_8: {
+						caption: { text: "위도와 경도를 짓밟는다." }
+					},
+					g_5_27: {
+						caption: { text: "폐허 사이에서는 폐허를 구분할 수 없었어." }
+					},
+					g_6_4: {
+						imageSrc: "./imgs/garden/6.4.jpg",
+						caption: {
+							text: `전부 산산조각나면 돌이킬 수 없을 것 같지만, 그건 아냐. 나와 집과 가족들을 맞춰 보면 화병 하나쯤은 될걸. 별나지만, 겨울에도 여름 꽃을 키우는 화단이 있다.
+
+이제 그 꽃을 내게 줘.`
+						}
+					},
+					g_1_13: {
+						imageSrc: "./imgs/garden/1.13.jpeg",
+						caption: { text: "검침원을 보내 주겠다고 한 지 며칠이 지났는데, 아직도 오지 않아. 나는 마당에 놓인 의자에 앉아 하염없이 기다리고 있어. 검침원을 부르기는 했던 걸까? 가스 냄새가 난다는 핑계로 사람을 보고 싶다. 여긴 아직 아무도 안 와." }
+					},
+					g_10_13: {
+						imageSrc: "./imgs/garden/10.13.jpg",
+						caption: {
+							text: `알코올로 시간을 닦는다.
+
+실외는 실내를 만드는 부품에 불과했다. 내가 앞을 보고 있을 때 뒤는 존재하지 않았지. 내가 잠들 때 잠깐, 세계는 재정비에 들어갔지.
+
+내가 깨지 않도록 주의해야 했을 거야.
+
+오늘은 하늘의 그래픽이 깨져 있다.
+
+그건 거울도 마찬가지다.`
+						}
+					},
+					g_10_10: {
+						caption: { text: "집에서 가장 먼 곳까지 도망을 쳤고, 뜀박질을 한 곳에 또 집이 있었어. 모든 게 끝난 뒤에도 벗어날 수가 없었지. 우체통 앞에 피가 섞인 오줌을 누었다." }
+					},
+					g_7_6: {
+						imageSrc: "./imgs/garden/7.6.png",
+						caption: { text: "문을 열고 밖으로 나갔을 때는 마당이 숲을 키워 낸 뒤였다. 다 자란 육식동물의 혈관처럼 날렵하고, 무성해져 있었다. 뽑으려고 했던 잡초마저 내 키를 훌쩍 넘어 있었다. 이런 곳에서는 식료품을 사러 나섰다가 조난을 당하기도 한다. 나는 이곳에 조난당했어." }
+					},
+					g_1_15: {
+						imageSrc: "./imgs/garden/1.15.jpg",
+						caption: {
+							text: `내가 본 모든 동화는 누군가 죽어야만 끝이 났다.
+
+구조대를 기다리기에는 세계가 너무 수상해.
+
+어느 날은 밖에 나와 보니 못 보던 맨홀 하나가 생겨 있었다.
+
+맨홀을 열고 줄을 드리워 깊이를 가늠한다.
+
+아직도 줄이 내려가고 있다.
+
+무엇인가 내리기 직전이라고 생각했다.`
+						}
+					},
+					g_9_6: {
+						caption: { text: "0과 1로 만들어진 집의 뼈대에 1을 영원히 더하는 시간. 한번만 더, 한번만 더. 영원히 둘은 될 수 없었지. 영원이라는 게 있긴 할까? 영원이 아닌 게 있긴 한가? 그럼 내가 지금 하고 있는 짓들은, 도대체 뭔데?" }
+					},
+					g_1_18: {
+						caption: { text: "전기실로 내려가는 통로가 막혔어. 스위치가 있다면 그걸 내리고 싶었는데. 여긴 너무 오래 켜져 있었어. 과부하가 온 게 분명해. 그렇지 않고서야, 이런 혹한에, 이렇게 뜨겁고 엉망일 수는 없을 텐데." }
+					},
+					g_5_28_b: {
+						caption: { text: "정말 내가 시작된 적이 있긴 한 걸까? 그렇지 않다면, 나는 끝날 수 없는 걸까?" }
+					},
+					g_5_29: {
+						imageSrc: "./imgs/garden/5.29.png",
+						caption: { text: "오븐 속에서 서서히 불타는 집을 뒤로하고, 눈을 문지르며 무작정 밝은 곳으로 걸음을 옮겼어. 그동안의 시간은 너무 어둡고 쓸쓸했지." }
+					},
+					g_5_30: {
+						caption: { text: "너무 밝아도 앞이 보이지 않았다." }
+					}
+				}
+			},
+			kitchen: {
+				dates: [
+					{ id: "k_7_23", label: "7/23", x: 292, y: 0 },
+					{ id: "k_5_28", label: "4/22", x: 192, y: 0 },
+					{ id: "k_10_24", label: "10/24", x: 387, y: 0 },
+					{ id: "k_5_9", label: "5/9", x: 532, y: 0 },
+					{ id: "k_9_2", label: "9/2", x: 85, y: 51 },
+					{ id: "k_2_18", label: "2/18", x: 159, y: 51 },
+					{ id: "k_1_13", label: "1/13", x: 282, y: 51 },
+					{ id: "k_10_5", label: "10/5", x: 373, y: 51 },
+					{ id: "k_1_7", label: "1/7", x: 443, y: 51 },
+					{ id: "k_2_1", label: "2/1", x: 39, y: 102 },
+					{ id: "k_9_3", label: "9/3", x: 176, y: 102 },
+					{ id: "k_5_29", label: "4/23", x: 56, y: 153 },
+					{ id: "k_1_22", label: "1/22", x: 131, y: 153 },
+					{ id: "k_5_27_a", label: "4/21", x: 282, y: 153 },
+					{ id: "k_6_8", label: "6/8", x: 373, y: 153 },
+					{ id: "k_5_27_b", label: "4/21", x: 427, y: 153 }
+				],
+				mediaByDate: {
+					default: {
+						image: { width: 397, height: 265, left: 182, top: 72 },
+						caption: { text: "", left: 82, top: 24 }
+					},
+					k_5_28: {
+						imageSrc: "./imgs/kitchen/5.28.png",
+						caption: { text: "난 몰랐는데 오늘이 내 생일이래. 태어나 버린 거 축하해. 그런 말을 들으면서, 으스대면서, 짝다리나 짚는 날. 기념한다는 거 참 좋은 거지. 케이크는 무슨 시트일까? 어떤 잼을 펴 바를까? 어떤 스프링클, 어떤 장식을 넣을까…… 생각은 끝이 없어. 내가 태어났다는 걸 핑계 삼아 내가 시작된 것처럼. 계속 이어지는 거야. 오븐이 돌아가고 있어. 그 안에 무엇이 있을지 알 수 없지만." }
+					},
+					k_7_23: {
+						caption: { text: "내가 아는 한, 내가 아닌 것들은 전부 나이가 많고 무디고 무섭고…… 나는 지금 내게 붙은 혹을 갈라 숟가락으로 속을 파고 있는데." }
+					},
+					k_10_24: {
+						imageSrc: "./imgs/kitchen/10.24.png",
+						caption: { text: "식탁에는 어제 깎아 둔 사과 반쪽.\n\n색이 변해 있었지.\n\n그걸 보고 있으면 시간이 간다는 걸 알 수 있다.\n\n그런 것들이 나를 괴롭게 한다." }
+					},
+					k_5_9: {
+						caption: { text: "엄마는 아침마다 녹즙을 내렸다. 입에 머금었을 때 덩어리가 느껴지면 혀로 살살 굴리다가, 씹지 않고 안번에 넘겼지. 아빠는 내 입에 손가락을 넣어 입을 벌리게 했어. 다 삼킨 걸 알면 입을 다물 수 있었지. 다행이야. 혀 밑에 이 집에 대한 솔직하고 추악한 감상평을 숨겨 두었는데, 들키지 않았어." }
+					},
+					k_9_2: {
+						imageSrc: "./imgs/kitchen/9.2.JPG",
+						caption: { text: "엄마가 몽유병에 걸렸어.\n냉장고 앞에 앉아 돼지 앞다리뼈를 한번에 꿀꺽 삼키는 걸, 내 두 눈으로 봤거든.\n굶주렸던 걸까?\n아무래도 아니야.\n항상 허기를 느꼈으니까.\n엄마의 입술은 고무장갑처럼 늘어지고, 얇은 뼈대는 살을 간신히 지탱해 주는 천막 같기도 했지.\n다만 뭐든 삼킬 준비가 돼 있었어.\n나, 차라리 그 속에서 살고 싶기도 했는데.\n대강당처럼 소리가 울리고 바람 드는 공간.\n다만, 천장이 있고 넓고 길게 펼쳐진 그곳에.\n엄마는 이제 다시는, 그 무엇도 들이지 않겠다고 다짐하면서도,\n무엇까지 삼킬 수 있을지 궁금해하기도 했지.\n자신이 가진 긴 터널을 시험해 보려는 걸까?\n이대로, 계획 없이, 전부 망가친 채로\n어디까지 갈 수 있을지 확인해 보려는 것처럼.\n끝을 보려는 것처럼." }
+					},
+					k_2_18: {
+						imageSrc: "./imgs/kitchen/2.18.jpg",
+						caption: { text: "오이는 시원해.\n참외는 득실거려.\n수세미는 뭉근해.\n앞치마는 산뜻했고,9.3\n석류는 썩은 치아.\n자수로 새긴 양은 무식해.\n샹들리에는 무난했지.\n환풍기는 주저해.\n라즈베리는 꿈결처럼.\n벌꿀은 희생이야.\n타일은 안전해.\n포크는 미묘해.\n들창의 표정은 이상했다.\n송곳은 답답해.\n키위는 꽉 쥔 주먹.\n초콜릿은 늪지대.\n파니니는 빽빽해.\n찻잔은 황홀했나.\n키스는 칼날을 느껴.\n신문지는 버젓이.\n머리카락은 두드린다.\n비닐은 절대적이야.\n달걀은 노크.\n나이프는 퍼즐.\n식탁보는 긴장해.\n\n나도 언젠가 어울리는 한 쌍의 공동체에 속하고 싶었는데. 이런 세계에 묶여 있고 싶지 않아. 지겨워." }
+					},
+					k_1_13: {
+						caption: { text: "그런데, 내가 언제부터 여기 살았지?\n\n아빠, 아빠. 엄마, 엄마. 형, 형. 나, 나.\n공동체는 여러 번 부를 때 무너진다.\n고정된 의미를 파괴하면서 나아가는 쇄빙선.\n태어날 때부터 거기 있었어, 나는,\n\n나는. 지금 어디로 가고 있는 걸까?\n\n다른 길로 우회해서 갈 때 이상함을 감지한다.\n누수나 누출과는 다른, 균열.\n\n거기 칼이 꽂혀 있다." }
+					},
+					k_10_5: {
+						imageSrc: "./imgs/kitchen/10.5.png",
+						caption: { text: "엄마가 사라졌어.\n보이지 않아.\n엄마가 사라진 날부터 창밖이 새까매졌어.\n아무것도 보이지 않아.\n나는 차라리 묵음에 가까워졌지.\n엄마가 드디어 집 전체를 삼키는 데 성공한 걸까?\n엄마, 내 목소리 들려요?" }
+					},
+					k_1_7: {
+						imageSrc: "./imgs/kitchen/1.7.png",
+						caption: { text: "우리 집안은 가계도가 없어.\n예전에 태워 없앴는데 남은 불씨가 큰 산불을 냈대.\n혈통은 다른 혈통을 잡아먹으며 몸집을 키우고, 내 피가 가진 형질은 산보다 큰 불이지." }
+					},
+					k_2_1: {
+						caption: { text: "냉장고 속에는 나보다 나이가 많은 식재료가 있다. 냉장고에 들어간 식재료라고 함은, 의지를 표명할 수 없다는 것을 뜻한다.\n그렇다면 우리는 식재료겠네. 네발동물이나 바질이나 두릅처럼 연약한 잎사귀." }
+					},
+					k_9_3: {
+						imageSrc: "./imgs/kitchen/9.3.jpg",
+						caption: { text: "어린이를 위한 서적의 부록으로 동족 포식에 대한 내용이 실린 적 있다. 엄마는 세상 모든 식이요법을 익힌다. 엄마, 뭐 해? 물으면 가끔은 엄마 목소리가 너무 이상해서, 안에 숨겨 놓은 가축 하나 있다고 생각했지. 엄마는 식사 속도 조절을 위해 숟가락을 쓰지 않았지. 오직 젓가락만을 사용했어. 그건 빨래집게로 집어 놓은 인형의 귀와 오프너에 꿰어 놓은 나무보다 더욱 기묘한 신호. 엄마는 우리가 보지 않을 때 입을 쩌억, 하고 크게 벌리고. 그건 꼭 어떤 준비 자세처럼 보이기도 했는데. 우리 아빠는 행인들에게 지 애비까지 잡아먹은 놈, 그런 소리를 듣고 지낸다는데. 아빠, 아빠. 내가 정말 아빠를 삼킬 수 있을까요. 지금 나는 스물아홉 번째 영구치가 나려고 하는데." }
+					},
+					k_5_29: {
+						caption: { text: "기분 좋은 날에 사람들과 함께 있기 위해서는 그곳에 모인 사람들 전부의 기분이 좋아야 했어. 어째서 맞물리지 못했나. 허접한 톱니바퀴처럼 구르는, 이런 게 삶이라고 어른들은 왜 가르쳐 주지 않았나?" }
+					},
+					k_1_22: {
+						imageSrc: "./imgs/kitchen/1.22.png",
+						caption: { text: "나는 나의 심장을 볼 일이 없을 거야. 심장은 구경하기 위해 만들어진 것이 아니니까. 다만 다른 쓰임을 가졌지. 그렇다면 나는, 어떤 쓰임을 위해 이곳에 온 거지." }
+					},
+					k_5_27_a: {
+						imageSrc: "./imgs/kitchen/5.27.JPG",
+						caption: { text: "나는 의외로 혼자서도 할 줄 아는 것이 많은 아이였지. 이상한 일이지만, 대부분의 행동들은 시작하기 전에 큰마음 먹지 않아도 됐다." }
+					},
+					k_6_8: {
+						caption: { text: "생선 먹을 때 눈알을 젓가락으로 헤집었지. 이빨은 잘잘못을 따지기에 조약돌보다 못한 것이었어. 가시를 삼키다 대신 정곡을 찔리기도 하는 날들이 이어졌다. 형이 없는 식탁이라고 한들 중단되진 않았어. 그때 나는 잠시 유약해졌을까. 아빠에게 복수해야겠다는 생각은 문득, 수십 년간 모르고 살던 실금처럼 미묘하게. 인간은 가끔 처절한 언덕을 넘을 때 변화한다는 것이 믿기지 않았다. 맥을 못 추리고 비탈에서 굴러떨어진다 해도." }
+					},
+					k_5_27_b: {
+						caption: { text: "오븐의 예열이 끝날 때, 나는 자루에 넣고 동여맨 집을 질질 끌고 오겠지." }
+					}
+				}
+			},
+			"living room": {
+				dates: [
+					{ id: "lr_10_11", label: "10/11", x: -44, y: 0 },
+					{ id: "lr_4_24", label: "5/30", x: 113, y: 0 },
+					{ id: "lr_5_1", label: "5/1", x: 370, y: 0 },
+					{ id: "lr_9_25", label: "9/25", x: 440, y: 0 },
+					{ id: "lr_8_29", label: "8/29", x: -6, y: 51 },
+					{ id: "lr_4_22", label: "5/28", x: 275, y: 51 },
+					{ id: "lr_2_13", label: "2/13", x: 493, y: 51 },
+					{ id: "lr_10_10", label: "10/10", x: -23, y: 102 },
+					{ id: "lr_9_21_a", label: "9/21", x: 80, y: 102 },
+					{ id: "lr_10_27", label: "10/27", x: 320, y: 102 },
+					{ id: "lr_12_15", label: "12/15", x: 403, y: 102 },
+					{ id: "lr_6_8", label: "6/8", x: 56, y: 153 },
+					{ id: "lr_7_3", label: "7/3", x: 182, y: 153 },
+					{ id: "lr_1_3", label: "1/3", x: 303, y: 153 },
+					{ id: "lr_9_21_b", label: "9/21", x: 57, y: 204 },
+					{ id: "lr_5_29", label: "4/23", x: 215, y: 204 },
+					{ id: "lr_10_9", label: "10/9", x: 450, y: 204 }
+				],
+				mediaByDate: {
+					default: {
+						image: { width: 397, height: 265, left: 170, top: 58 },
+						caption: { text: "", left: 66, top: 24 }
+					},
+					lr_10_11: {
+						imageSrc: "./imgs/livingroom/1011.jpg",
+						caption: { text: "어두운 전망을 움직이게 하고 오겠다는 아빠는 건전지 단자를 혀에 댄 채 눈을 뒤집고 있다.\n\n소파 시트는 두개골의 가장자리처럼 푹 들어가 있어." }
+					},
+					lr_4_24: {
+						caption: { text: "짐승이 묶여 있는 풍경은 짐승이 앉아 있는 것으로도 독해되었다." }
+					},
+					lr_5_1: {
+						imageSrc: "./imgs/livingroom/5.1.png",
+						caption: { text: "아빠는 오후 세 시가 되면 소파에 기대 낮잠을 잤다. 나는 아빠의 무릎에 머리를 대고 누워 눈을 감는다. 저녁이 되기 전에, 아빠의 꿈자리에 사정없이 덫을 놓아 두어야 한다." }
+					},
+					lr_9_25: {
+						imageSrc: "./imgs/livingroom/9.25.png",
+						caption: { text: "어쩌면 나는 생활에게 납치된 거야. 감금된 거야. 밀봉된 거야. 그렇게까지 정물이 된다는 건 참 지루했어. 그래서 운명은 극단적이게 된 건가. 안정을 찾고 싶어. 안쪽에서 숨을 쉬는 건 언제나 어지럽고 탁한 일." }
+					},
+					lr_8_29: {
+						imageSrc: "./imgs/livingroom/8.29.jpg",
+						caption: { text: "아빠가 형을 때리고, 밖으로 내쫓았어. 봉제인형 같은 엄마는 단춧구멍으로 실을 늘어뜨리면서 막 울었지. 최선이라는 말은 다 가짜 같아. 나는 나를 내 속에 가두고 명치를 지나게 봉제선을 짰다. 그건 꼭, 굴종에 성공한 식물 같기도 했는데. 난 이리저리 엮이고 파고든 채 깊은 곳으로 뻗을 거야. 그 안에서 오래도록 잠 잘 거야." }
+					},
+					lr_4_22: {
+						caption: { text: "나는 오늘 아빠가 아끼던 타란툴라를 잃어버렸어. 독이 있다고 했는데, 먹이를 주려고 사육장 문을 열어둔 게 실수였어. 형과 나는 반나절 동안 소파 시트와, 뱀술의 바닥과, 칼집 속 같은 곳들을 샅샅이 뒤졌지만 찾을 수 없었어.\n\n형은 아빠에게 자신이 타란툴라를 잃어버렸다고 실토했지. 그때 형은 왜 괜찮다고, 내게 눈짓을 보냈을까? 아빠는 형의 볼을 쓰다듬었어. 형은 아빠가 보는 앞에서 거미처럼 네 다리로 거실을 기다가, 귀뚜라미를 잡아야만 했지. 내 사전에 기록돼 있지 않은 유일한 것, 그때 형은 내가 본 것들 중 가장 아름다운 생명체였어. 난 그 앞에서 절절맸지." }
+					},
+					lr_2_13: {
+						caption: { text: "급소의 생김새는 왜 붉고 순한가에 대해 생각하면서, 형과 번갈아가며 퀴즈를 냈다. 서로의 수명을 맞히는 놀이에서 우리는 막혀버렸고, 이렇다 할 진전이 없었어. 미로를 나가기 위해서는 오른쪽 벽에 손을 대고 그대로 따라가면 된다. 우리는 서로 끌어안은 채로 거실만 빙빙 돌고 있었어." }
+					},
+					lr_10_10: {
+						imageSrc: "./imgs/livingroom/1010.png",
+						caption: { text: "아빠의 기분에는 주사위처럼 눈이 달렸어.\n\n어제는 6, 그저께는 5…… 엊그제는 뭐였더라. 대체로 높은 숫자가 나왔지.\n\n오늘은 아빠를 계단에서 밀어버렸어. 이번에는 꼭, 1이 나와야 해요. 아빠는 구르고, 또 굴렀어. 데굴데굴. 데굴데굴이라는 단어를 발음하고 있으면 어딘가 귀여워진다. 아빠, 굴러보세요. 데굴데굴, 데굴데굴데굴데굴데굴…… 흥겹게요. 은근슬쩍 굴을 먼저 시작해도 말이 된다. 굴데굴데굴데굴…… 그런데 나, 주사위에서 0이 나올 수 있다는 건 그때 처음 알았어.\n\n아빠의 눈이 다 감긴 날에야 알았어." }
+					},
+					lr_9_21_a: {
+						caption: { text: "형은 다시 태어난다면, 뭘로 태어나고 싶어? \n형은 대답하지 않는다.\n\n나는 가끔씩 내가 모르는 사람 같아. 내가 나를 강제로 부수고 들어온 행인 같기도 해. 내가 나를 외딴 곳에 납치하는 밀수범처럼 느껴지기도 해. 내가 모르는 그 어떤 사람보다 내가 낯설어질 때가 있어. 내가 나를 외도하고 싶기도 했지. 내가 내 바깥으로 나가면, 그곳은 어디일까? 내가 내 집을 버리고 나선다면, 내 집이 될 곳은 어디일까? \n\n형은 내가 말해야만 대답하는 사람이야?\n형은 대답하지 않는다." }
+					},
+					lr_10_27: {
+						caption: { text: "나를 제외한 모두가 사라지고 일주일이 지났다.\n\n끝나질 않네. 먹이를 줄 사람이 없으니 집은 더는 커지지 않고, 세계는 중단돼 있다.\n\n지시를 받는다.\n\n정전.\n\n앞으로 더는 밝아지지 않는 곳.\n\n내 불행을 먹고 자라는 곳.\n\n그런 지독한 곳에 갇혀 있다." }
+					},
+					lr_12_15: {
+						caption: { text: "상자를 뒤지다가 지난 여름 수첩 사이에 넣어 둔 곤충을 만났어. 벽과 손 사이처럼 내밀하게 끼어 있던 그 친구와. 무언가를 서서히, 끝까지 누를 때의 감각을 기억해. 처음엔 말랑하다가도 빠직, 소리가 났는데…… 축축해, 축축했어. 전부 젖은 것처럼. 사람이 죽으면 온몸에서 물이 나온대. 장마에 나는 고가도로를 따라 질주하기도 했지. 우리는 모두 젖은 채 울며 태어났는데, 어떤 죽음들은, 왜, 다시금 젖어야만 하는 걸까." }
+					},
+					lr_6_8: {
+						caption: { text: "주2회 정도, 형과 나 사이에 유골함을 두고 상황극을 하던 시기가 있었다. 형은 아빠, 나는 할아버지. 주거니, 받거니. 상황극을 하다가 멍을 나누고, 멍을 핥아 주면서. 아빠를 이해하려 노력하던 시기가 있었지. 유전되는 것은 너의 육체만이 아니란다. 꽃을 심은 자리에 꽃이 났다. 할아버지가 분뇨를 한 곳에 아빠가 태어났다고 한다. 일기장에는 신성한 고목나무 밑에서 아빠가 태어났다고 적어 두었다. 신화는 전부 거짓부렁이야." }
+					},
+					lr_7_3: {
+						imageSrc: "./imgs/livingroom/7.3.png",
+						caption: { text: "기둥과, 기둥과, 기둥. 기둥에서 뻗은 가지들은 열렬히 엮여 있다. 무질서함 속에 거미가 줄을 친다. 나는 이미 집 안으로 삼켜진 지 오래인 하루." }
+					},
+					lr_1_3: {
+						caption: { text: "하루에도 수천 번씩 생기는 모조품 사이에서 진짜 ‘감각’이라고 할 만한 것들을 찾는다. 산산조각을 학습하면서, 깨진 조각들 속에서 진정한 내 것을 찾고 싶다. 그런 게 정말 존재한다면, 내게 허락된다면. 앤틱 장식과 아기 천사 한 명이 새겨진 것이었으면 좋겠어. 눈물이 날 정도로 신성한 것이었으면 좋겠어." }
+					},
+					lr_9_21_b: {
+						caption: { text: "큰소리가 들려 내려오니 거실 바닥에 형이 엎드려 있었어. 나는 입에 물고 있던 사탕을 떨어뜨렸다. 사탕은 그 어떤 날붙이보다 더 날카롭게 갈라졌다." }
+					},
+					lr_5_29: {
+						imageSrc: "./imgs/livingroom/5.29.png",
+						caption: { text: "괘종시계는 1분간 먹먹한 짐승처럼 운다. 끝을 예감한 것들은 그게 무엇이든 짐승이 된다." }
+					},
+					lr_10_9: {
+						caption: { text: "문제를 풀기 위해서는 문제를 없애야 해." }
+					}
+				}
+			},
+			bedroom: {
+				dates: [
+					{ id: "b_5_27", label: "4/21", x: 40, y: 0 },
+					{ id: "b_10_11", label: "10/11", x: 170, y: 0 },
+					{ id: "b_7_18", label: "7/18", x: 262, y: 0 },
+					{ id: "b_10_28", label: "10/28", x: -3, y: 51 },
+					{ id: "b_8_5", label: "8/5", x: 114, y: 51 },
+					{ id: "b_11_13", label: "11/13", x: 340, y: 51 },
+					{ id: "b_5_3", label: "5/3", x: 498, y: 51 },
+					{ id: "b_7_17", label: "7/17", x: 109, y: 102 },
+					{ id: "b_1_2", label: "1/2", x: 242, y: 102 },
+					{ id: "b_6_19", label: "6/19", x: 307, y: 102 },
+					{ id: "b_7_21", label: "7/21", x: 56, y: 153 },
+					{ id: "b_1_8", label: "1/8", x: 240, y: 153 },
+					{ id: "b_2_5", label: "2/5", x: 384, y: 153 },
+					{ id: "b_1_1", label: "1/1", x: 154, y: 204 }
+				],
+				mediaByDate: {
+					default: {
+						image: { width: 397, height: 265, left: 210, top: 64 },
+						caption: { text: "", left: 92, top: 22 }
+					},
+					b_5_27: {
+						imageSrc: "./imgs/bedroom/5.27.png",
+						caption: { text: "생일 전날에는 악몽을 올랐다.\n협탁 안쪽에 살던 괴물과 술래잡기를 한다.\n\n“거기 있어?”\n“난 언제나 여기 있었어.”\n“입에 얼음을 넣고 있으면 네 속의 불을 느낄 수가 있어.”\n“여긴 뜨거워. 나를 잡더라도 안지는 마.”\n“그런데, 너는 누구야?”\n“나는 아무것도 아니고, 네가 알고 있는 전부도 될 수 있지.”\n“우리는 꼭, 닮았네.”\n“난 트라우마가 있어서 꼭, 너에게 애인이라는 별칭을 붙여 주고 싶다. 허락해 줄래?”\n“하지만 난 이제 어떤 약속도 하고 싶지가 않은걸…….”\n\n이건 놀이인데, 놀이가 안 되었다.\n\n계단을 끝없이 오르는 동안 많은 것이 달라져 있었다." }
+					},
+					b_10_11: {
+						caption: { text: "오늘부로 부모님 침실을 내가 쓸 수 있게 됐다. 그렇다는 건, 내가 이제 가장 나이가 많다는 뜻이고. 누구든 이 집에서 나를 보면 엎드려야 할 거야. 위기를 느낀 개처럼, 밟고 지나간 젤리처럼 납작하게." }
+					},
+					b_7_18: {
+						caption: { text: "그게 누구든, 나를 낳아야 했다면 망설이지 않았을 거야. 맹렬하게 추운 겨울밤, 개집에 들어간 노숙자의 발목을 잡고 끌어내는 손짓처럼. 거칠게 내동댕이쳤겠지. 그럼에도 난 터지지 않고 악착같이 기어서 지금 여기 있다.\n\n감이 홍시가 되는 과정을 지켜본 적 있어. 너무 오래 익은 열매는 밑이 빠지기도 한다. 바람은 자꾸만 회초리질을 하는데. 삶을 받쳐 줄 턱이 없으니 과육은 바닥에 투둑, 툭 소리를 내며 떨어졌어. 너무 무른 것들. 미련한 것들.\n\n나는 새벽마다 계단을 감아올려 안방 문에 귀를 대고 있었어. 부모님이 나를 버리기 위해 작당모의를 하는 게 아닐까 싶어서. 그런 생각을 하고 있으면, 할아버지를 묻고 오던 날이 떠올라. 할아버지가 올라간 사다리를 세차게 흔들던 아빠의 표정이 생각나. 나는 언제쯤 그런 해방을 느낄 수 있을까. 마당에 엎어져 있는 할아버지는 후숙을 너무 오래 한 거야. 난 수풀 뒤에서 그걸 보고만 있었어. 미안해요." }
+					},
+					b_10_28: {
+						caption: { text: "발이 저려서 새벽에 깼어. 저린 통증이 온몸으로 퍼져서 옴짝달싹할 수 없는 사람이 되었지. 침을 바른 검지로 더럽혀진 새벽을 닦자. 현대는 어둡고 싸늘한 면의 음각 같아." }
+					},
+					b_8_5: {
+						imageSrc: "./imgs/bedroom/8.5.jpg",
+						caption: { text: "나는 아빠와 엄마 사이에서 태어난 두 번째 분비물이라는 생각을 한 적이 있다. 지금보다 덜 알고 덜 미련했을 때는 의지 또한 부족했지. 휴지로 닦으면 사라질 것들, 그게 나와 형이라고 생각한 적 있어. 장난으로 산새의 둥지를 장대로 떨어뜨리는 사람들이 있지. 깨진 알은 햇살을 쬐며 흐르고, 천천히 말랐고, 감히 형상도 가졌으며, 그때 잠깐 따스하기도 했다는데. 내가 모르는 온기." }
+					},
+					b_11_13: {
+						caption: { text: "폭우가 오자 벽지가 울기 시작했다.\n\n그만 좀 울어라.\n그만 울어.\n\n다음 생에는 내가 조금 더 신비하고, 영민한 것으로 태어나 볼게.\n\n형이 그립다." }
+					},
+					b_5_3: {
+						imageSrc: "./imgs/bedroom/5.3.JPG",
+						caption: { text: "나의 증상은 빠져나갈 뒷문이 없다는 것이다." }
+					},
+					b_7_17: {
+						caption: { text: "분절된 목각 인형을 찾았다. 어릴적 가지고 놀던 것이다. 나의 일부가 내게서 분리되는 체험은 상상만 해도 견딜 수가 없다. 나는 나의 검붉은 모서리를 쓰다듬느라 밤을 새운다." }
+					},
+					b_1_2: {
+						caption: { text: "내게 잔인하고 사랑스러운 감상자들이 있다는 가정:\n\n나는 그 어떤 볼거리도 만들어 주지 않을 것이다.\n자위하지 않을 것이고, 자살하지 않을 것이다.\n\n나는 그 어떤 결과값도 가지지 않은 불능의 상태가 될 것이다." }
+					},
+					b_6_19: {
+						imageSrc: "./imgs/bedroom/6:19.jpeg",
+						caption: { text: "\n\n어릴적, 엄마는 시한부 판정을 받고도 삼 년을 더 산 사람의 이야기를 해 주었다. 그 사람은 술에 취해 차에 몸을 던졌어. 피딱지가 껴 있는 손톱으로, 복권을 긁는 기분으로 살았을까. 매일매일." }
+					},
+					b_7_21: {
+						caption: { text: "변칙적인 호르몬과 사투를 한다. 내가 말이 아니게 되고. 말이 되지 않는 일들이 거듭되고. 내 몸은 나 말고 다른 것이 들어와 함께 살기 몸집이 좋고. 나는 그동안 주먹구구식으로 시간을 잃어버렸어. 내 생활은 개미 두 마리가 동시에 들어와 나무 쳇바퀴처럼 풍경을 서서히 바꿨어. 머리카락이 길어지면, 벌어지고 흉한 큼을 묶어서 메웠고, 졸린 나를 유인해 한사코 안아 주었고, 우스꽝스럽게 고깔을 쓴 운명과 함께 실뜨기를 했지. 내게는 인과가 없지만서도." }
+					},
+					b_1_8: {
+						imageSrc: "./imgs/bedroom/1.8.png",
+						caption: { text: "천장을 보고 눕는다.\n\n어떤 공감각도 없는 새벽,\n피 냄새와 철 냄새를 분간하지 못했다.\n\n기이한 일이지만" }
+					},
+					b_2_5: {
+						imageSrc: "./imgs/bedroom/2.5.jpg",
+						caption: { text: "나는 왜 그 어떤 언어로도 설명될 수 없을까. 나를 정의하기 위해 반나절을 썼지. 집에 있는 모든 책들을 검열하고 단어를 골라 냈지만, 나와 어울리는 건 찾을 수 없었어. 전부 어긋나는 식들이지. 나와 세계는 손깍지를 끼고, 세계는 그것을 비틀어 내 팔을 부러뜨렸어. 치료해 주지 않았지. 나는 세계의 목덜미를 물기 위해 소리도 내지 않고 바닥을 기었지. 다만 그것은 한번에 저지되었다. 리본처럼 묶여 예쁘게 이상하게 놓여 있다. 자비 없이 포장지를 찢어 선물을 열어볼 사람은 정말, 오지 않는 걸까? 그날을 그 아이의 생일로 하고, 큰 파티를 열어도 좋을 텐데." }
+					},
+					b_1_1: {
+						caption: { text: "이 모든 게 가혹한 실험 같아." }
+					}
+				}
+			},
+			bathroom: {
+				dates: [
+					{ id: "ba_8_13", label: "8/13", x: 370, y: 0 },
+					{ id: "ba_7_4", label: "7/4", x: 480, y: 0 },
+					{ id: "ba_9_23", label: "9/23", x: 192, y: 52 },
+					{ id: "ba_3_6", label: "3/6", x: 275, y: 52 },
+					{ id: "ba_3_9", label: "3/9", x: 423, y: 52 },
+					{ id: "ba_8_4", label: "8/4", x: 39, y: 104 },
+					{ id: "ba_7_5", label: "7/5", x: 242, y: 104 },
+					{ id: "ba_12_9", label: "12/9", x: 56, y: 156 },
+					{ id: "ba_7_25", label: "7/25", x: 57, y: 208 }
+				],
+				mediaByDate: {
+					default: {
+						image: { width: 397, height: 265, left: 190, top: 68 },
+						caption: { text: "", left: 78, top: 20 }
+					},
+					ba_8_13: {
+						imageSrc: "./imgs/bathroom/8.13.jpg",
+						caption: { text: "\n\n오늘 마당에서 본 예쁜 달팽이집이 아른거렸어. 자기 전까지도 그게 그리워서 변기 물 내려가는 걸 다섯 번쯤 보고 있었다. 일자로 박힌 나사처럼 혼란스러웠어. 나도 온전히 내 집을 가지고 싶어. 누가 나를 살게 해 줄까?" }
+					},
+					ba_7_4: {
+						caption: { text: "꿈에서 나는 수챗구멍 속에 갇혀 있었어. 내가 아는 모든 것들이 꿀꿀이죽처럼 뒤엉킨 곳. 나는 전화번호부에서 도움을 청할 수 있는 사람을 찾다가, 그럴 수 있는 사람이 없다는 걸 깨달았어. 이름과 번호를 번갈아 읽다 보면, 어느새 어둠이 내 옆자리를 침범해 있었다. 몸을 딱 붙이고, \"카드놀이에서 이기면 너와 진짜 너의 가족을 풀어주마.\" 어둠은 뒷면에 자신만의 패를 숨기고 있었다. 조커는 희생을 요구했다. 나는 나를 패로 삼아 여리고 아픈 내 집을 구하기로 결심했지." }
+					},
+					ba_9_23: {
+						imageSrc: "./imgs/bathroom/9.23.jpg",
+						caption: { text: "\n\n형의 몸에는 솜털이 너무 많았다. 다 씻기고, 욕조에 눕힌 뒤에도 물방울이 맺혀 있었다. 쪽창을 열고 입김을 불었다. 형이 홀씨처럼 전부 흩어졌어. 다시 태어나진 못할 거야. 여긴 전부 불모지니까." }
+					},
+					ba_3_6: {
+						caption: { text: "나의 접히는 부분은 붉어. 허벅지와 종아리, 머리와 어깨, 그것도 아니라면……\n\n다만 점선을 가지고도 나는 여전히 의도와 다른 방향으로 찢기는 사람이었지. \n모든 일이 끝나면 핑킹가위처럼 웃고 싶다.\n\n내게 붙은 각주들을 뜯어낸다.\n\n어떤 판단도 개입되지 않는 진짜 내가 될 수 있어." }
+					},
+					ba_3_9: {
+						caption: { text: "엄마, 엄마. 우리 집 욕실에 수맥이 흘러요. 주방에서 북어는 맥을 못 추리게 패야 한다는 대화가 흘러들었다. 엄마, 엄마. 그런데 나랑 형은 북어가 아닌걸요. \n\n아버지 목욕물을 받아 두거라. \n\n네.\n\n수맥이 흐른다. 가끔 맥을 따라가다 연기가 나기도 했는데, 아버지는 목욕물이 뜨겁다고 했거늘.\n\n배수구를 막은 털을 한 움큼 쥐고 빼내니 굶주린 신이 딸려나왔다. \n\n나는 신의 이야기를 들으며 들키지 않게 뼈를 씹었다. 신은 그것을 자신에게 달라고 했다. 나는 내가 가진 모든 것을 주고 소원 하나를 들어 달라고 했다. 신은 조금 더 달라고 이야기했다. 이게 제가 가진 전부인 걸요. 아니다, 너는 더 가진 것이 많아. \n\n팔척의 손이 나를 감식했고, 이튿날 아침이 돼서야 도망갈 수 있었다." }
+					},
+					ba_8_4: {
+						imageSrc: "./imgs/bathroom/8:4.JPG",
+						caption: { text: "어릴적 기억이 없는 건, 어떤 징조일까? 다만 끔찍한 건 모두 기억했어. 욕조에 몸을 넣고 오래도록 있었다. 사라지는 건 내가 아니라 시간이었다." }
+					},
+					ba_7_5: {
+						caption: { text: "거대한 산 위에 올라 질문을 크게 하면 메아리로 답신이 돌아오는 경우가 있다고 한다. 나는 발끝을 올리고는 부르짖었다. 나의 목소리들은 세면대에 머리를 부딪혀 바닥에 나동그라진다. 힘이 빠지면 샤워기의 물줄기로 그것들을 하수구 속으로 밀어낸다." }
+					},
+					ba_12_9: {
+						caption: { text: "세면대 위의 서랍함에서 다 문드러진 알 하나를 발견했다. 근사한 게 나올 줄 알고 두드리니 퍽 하고 터졌어. 피를 뒤집어쓴 채, 한동안 세면대에 걸터 앉아 있었지." }
+					},
+					ba_7_25: {
+						imageSrc: "./imgs/bathroom/7.25.png",
+						caption: { text: "\n\n착란 속에서 가짜를 구분해 낸다. \n\n거울 속에서 내가 나에게 말을 건다. 환풍기에게 사키라는 이름을 붙여 주고는 테이프를 붙여 숨을 못 쉬게 한다. 내게 소중한 것들은 애초에 있지도 않았어. 보고 싶은 게 있으면 기운이 나지. 불타는 걸 보고 싶다. 불어로 꿈을 꾼 날은 슬프지. 새 한 마리가 내 어깨로 날아와 앉았지. \n\n“이걸 너에게 줄게. 꼭 필요한 곳에 써야 한다.” \n“이걸 내게 준다면, 그렇게 한다면 너는?” \n\n내가 첫 단어를 고르기도 전에 새는 사라졌다. \n\n거울 속의 나와 서로의 생김새를 모작하는 시간을 가진다. 한 명은 종이 전체를 까맣게 칠했고, 한 명은 종이를 갈기갈기 찢었다.\n\n이것들 중 하나는 정말 나다." }
+					}
+				}
+			}
+		};
+
+		const roomNav = document.getElementById("room-nav");
+		const datesWrap = document.getElementById("dates-wrap");
+		const datesCanvas = document.getElementById("dates-canvas");
+		const mediaWrap = document.getElementById("media-wrap");
+		const page1 = document.getElementById("page-1");
+		const pageIntro = document.getElementById("page-intro");
+		const page2 = document.getElementById("page-2");
+		const toPage2Btn = document.getElementById("to-page-2");
+		const toPage1Title = document.getElementById("to-page-1");
+		const introCopy = document.getElementById("intro-copy");
+		let mediaRevealObserver = null;
+		const CAPTION_FIRST_MEDIA_IDS = new Set([
+			"g_1_15",
+			"g_1_13",
+			"k_10_5",
+			"k_1_7",
+			"k_5_27_a",
+			"lr_10_11",
+			"lr_5_1",
+			"lr_10_10",
+			"lr_7_3",
+			"lr_5_29",
+			"b_1_8",
+			"ba_8_13",
+			"ba_8_4",
+			"ba_7_25"
+		]);
+		const MEDIA_LEFT_OFFSETS = {
+			g_2_14: 24,
+			g_6_4: 286,
+			g_1_13: 112,
+			g_10_13: 320,
+			g_7_6: 56,
+			g_1_15: 224,
+			g_5_29: 336,
+			k_5_28: 18,
+			k_10_24: 248,
+			k_9_2: 118,
+			k_2_18: 332,
+			k_10_5: 42,
+			k_1_7: 274,
+			k_9_3: 88,
+			k_1_22: 304,
+			k_5_27_a: 164,
+			lr_10_11: 286,
+			lr_5_1: 58,
+			lr_9_25: 218,
+			lr_8_29: 8,
+			lr_10_10: 320,
+			lr_7_3: 104,
+			lr_5_29: 252,
+			b_5_27: 72,
+			b_8_5: 300,
+			b_5_3: 150,
+			b_1_8: 246,
+			b_2_5: 40,
+			ba_8_13: 286,
+			ba_8_4: 222,
+			ba_9_23: 62,
+			ba_7_25: 112
+		};
+		const IMAGE_SIZE_OVERRIDES = {
+			g_6_4: { width: 476, height: 318 },
+			g_10_13: { width: 476, height: 318 },
+			g_1_15: { width: 476, height: 318 },
+			g_5_29: { width: 476, height: 318 },
+
+			k_5_28: { width: 476, height: 318 },
+			k_10_24: { width: 476, height: 318 },
+			k_9_2: { width: 476, height: 318 },
+			k_2_18: { width: 476, height: 318 },
+			k_10_5: { width: 476, height: 318 },
+			k_1_7: { width: 476, height: 318 },
+			k_1_22: { width: 476, height: 318 },
+			k_5_27_a: { width: 476, height: 318 },
+
+			lr_10_11: { width: 476, height: 318 },
+			lr_9_25: { width: 476, height: 318 },
+			lr_10_10: { width: 476, height: 318 },
+			lr_7_3: { width: 476, height: 318 },
+			lr_5_29: { width: 476, height: 318 },
+
+			b_8_5: { width: 476, height: 318 },
+			b_6_19: { width: 476, height: 318 },
+			b_1_8: { width: 476, height: 318 },
+			b_2_5: { width: 476, height: 318 },
+
+			ba_8_13: { width: 476, height: 318 },
+			ba_8_4: { width: 476, height: 318 }
+		};
+
+		let selectedRoom = "";
+		let selectedDateId = "";
+
+		function resetSelectionState() {
+			selectedRoom = "";
+			selectedDateId = "";
+			updateRoomButtonState();
+			datesWrap.classList.add("hidden");
+			datesCanvas.innerHTML = "";
+			datesCanvas.className = "dates-canvas";
+			mediaWrap.className = "media-wrap hidden";
+			mediaWrap.innerHTML = "";
+			if (mediaRevealObserver) {
+				mediaRevealObserver.disconnect();
+				mediaRevealObserver = null;
+			}
+		}
+
+		function showPage(pageKey) {
+			page1.classList.remove("active");
+			pageIntro.classList.remove("active");
+			page2.classList.remove("active");
+
+			if (pageKey === "page2") {
+				page2.classList.add("active");
+				return;
+			}
+
+			if (pageKey === "intro") {
+				pageIntro.classList.add("active");
+				return;
+			}
+
+			page1.classList.add("active");
+		}
+
+		function setHashPage(pageKey) {
+			let hash = "#page1";
+			if (pageKey === "intro") {
+				hash = "#intro";
+			} else if (pageKey === "page2") {
+				hash = "#page2";
+			}
+
+			if (window.location.hash !== hash) {
+				window.location.hash = hash;
+			}
+		}
+
+		function syncPageByHash() {
+			if (window.location.hash === "#page2") {
+				showPage("page2");
+			} else if (window.location.hash === "#intro") {
+				showPage("intro");
+			} else {
+				showPage("page1");
+			}
+		}
+
+		function createRoomButtons() {
+			const roomNames = ["garden", "kitchen", "living room", "bathroom", "bedroom"];
+			roomNav.innerHTML = "";
+
+			roomNames.forEach((roomName) => {
+				const btn = document.createElement("button");
+				btn.type = "button";
+				btn.className = "room-btn";
+				btn.textContent = roomName;
+				btn.dataset.room = roomName;
+
+				btn.addEventListener("click", () => {
+					selectedRoom = roomName;
+					selectedDateId = "";
+					updateRoomButtonState();
+					renderDates(roomName);
+					mediaWrap.classList.add("hidden");
+					mediaWrap.innerHTML = "";
+				});
+
+				roomNav.appendChild(btn);
+			});
+		}
+
+		function updateRoomButtonState() {
+			const buttons = roomNav.querySelectorAll(".room-btn");
+			buttons.forEach((btn) => {
+				btn.classList.toggle("active", btn.dataset.room === selectedRoom);
+			});
+		}
+
+		function renderDates(roomName) {
+			const roomInfo = ROOM_DATA[roomName];
+			const dateItems = roomInfo.dates;
+			let maxY = 0;
+
+			datesCanvas.innerHTML = "";
+			datesCanvas.className = "dates-canvas room-" + roomName.replace(/\s+/g, "-");
+			datesWrap.classList.remove("hidden");
+
+			dateItems.forEach((item) => {
+				const dateBtn = document.createElement("button");
+				dateBtn.type = "button";
+				dateBtn.className = "date-btn";
+				dateBtn.textContent = item.text || item.label;
+				dateBtn.dataset.dateId = item.id;
+				dateBtn.style.setProperty("--date-x", item.x + "px");
+				dateBtn.style.setProperty("--date-y", item.y + "px");
+
+				dateBtn.addEventListener("click", () => {
+					selectedDateId = item.id;
+					updateDateButtonState();
+					renderMedia(roomName, item.id, item.label);
+				});
+
+				datesCanvas.appendChild(dateBtn);
+				maxY = Math.max(maxY, item.y);
+			});
+
+			datesCanvas.style.height = maxY + 64 + "px";
+		}
+
+		function updateDateButtonState() {
+			const buttons = datesCanvas.querySelectorAll(".date-btn");
+			buttons.forEach((btn) => {
+				btn.classList.toggle("active", btn.dataset.dateId === selectedDateId);
+			});
+		}
+
+		function getMediaData(roomName, dateId) {
+			const roomInfo = ROOM_DATA[roomName];
+			if (!roomInfo || !roomInfo.mediaByDate) {
+				return null;
+			}
+
+			const defaultMedia = roomInfo.mediaByDate.default || {};
+			const dateMedia = roomInfo.mediaByDate[dateId] || {};
+
+			return {
+				image: {
+					...(defaultMedia.image || {}),
+					...(dateMedia.image || {}),
+					...(MEDIA_LEFT_OFFSETS[dateId] !== undefined ? { left: MEDIA_LEFT_OFFSETS[dateId] } : {}),
+					...(IMAGE_SIZE_OVERRIDES[dateId] || {})
+				},
+				caption: {
+					...(defaultMedia.caption || {}),
+					...(dateMedia.caption || {})
+				},
+				imageSrc: dateMedia.imageSrc || defaultMedia.imageSrc || ""
+			};
+		}
+
+		function renderCaptionText(captionElement, text) {
+			const lines = String(text || "").split("\n");
+			captionElement.innerHTML = "";
+
+			lines.forEach((lineText, index) => {
+				const line = document.createElement("span");
+				line.className = "caption-line";
+				line.textContent = lineText.length ? lineText : "\u00a0";
+				captionElement.appendChild(line);
+			});
+		}
+
+		renderCaptionText(
+			introCopy,
+			"네가 이곳을 발견하기 전에 여기서 무슨 일이 있었는지, 아마 상상도 못할 거야. 집 곳곳에 거짓과 진실이 섞인 메모를 흩뿌려 놨어. 너는 그걸 구분할 수 없겠지. 피차 편해질 거야. 어느 쪽도 믿을 수 없을 테니까. 안으로 들어와. 들어와서 내 이야기를 다 듣고, 어떤 게 진실인지 네 눈으로 직접 확인해 봐. 여긴 나와 가족들이 살고 있어. 귓불이 찢어질 때까지 내 이야기를 들어 줘. 응? 제발, 제발, 제발."
+		);
+
+		function renderMedia(roomName, dateId, dateLabel) {
+			const mediaData = getMediaData(roomName, dateId);
+			if (!mediaData) {
+				mediaWrap.className = "media-wrap hidden";
+				mediaWrap.innerHTML = "";
+				if (mediaRevealObserver) {
+					mediaRevealObserver.disconnect();
+					mediaRevealObserver = null;
+				}
+				return;
+			}
+
+			const roomClass = "room-" + roomName.replace(/\s+/g, "-");
+			const dateClass = "date-" + dateId;
+			mediaWrap.className = "media-wrap media-reveal " + roomClass + " " + dateClass;
+			mediaWrap.innerHTML = "";
+			mediaWrap.classList.remove("is-visible");
+
+			if (mediaRevealObserver) {
+				mediaRevealObserver.disconnect();
+			}
+
+			mediaRevealObserver = new IntersectionObserver(
+				(entries) => {
+					entries.forEach((entry) => {
+						if (entry.isIntersecting) {
+							mediaWrap.classList.add("is-visible");
+						} else {
+							mediaWrap.classList.remove("is-visible");
+						}
+					});
+				},
+				{
+					root: null,
+					threshold: 0.22,
+					rootMargin: "0px 0px -12% 0px"
+				}
+			);
+
+			mediaRevealObserver.observe(mediaWrap);
+
+			const caption = document.createElement("p");
+			caption.className = "media-caption";
+			renderCaptionText(caption, mediaData.caption.text);
+			caption.style.setProperty("--caption-left", mediaData.caption.left + "px");
+			caption.style.setProperty("--caption-top", mediaData.caption.top + "px");
+
+			const captionFirst = CAPTION_FIRST_MEDIA_IDS.has(dateId);
+
+			if (captionFirst) {
+				mediaWrap.appendChild(caption);
+			}
+
+			if (mediaData.imageSrc) {
+				const slot = document.createElement("div");
+				slot.className = "image-slot media-image-slot";
+				slot.style.setProperty("--media-width", mediaData.image.width + "px");
+				slot.style.setProperty("--media-left", mediaData.image.left + "px");
+				slot.style.setProperty("--media-top", mediaData.image.top + "px");
+
+				const img = document.createElement("img");
+				img.src = mediaData.imageSrc;
+				img.alt = roomName + " " + dateLabel + " image";
+				img.loading = "lazy";
+				slot.appendChild(img);
+				mediaWrap.appendChild(slot);
+			}
+
+			if (!captionFirst) {
+				mediaWrap.appendChild(caption);
+			}
+		}
+
+		toPage2Btn.addEventListener("click", () => {
+			setHashPage("intro");
+			showPage("intro");
+		});
+
+		toPage1Title.addEventListener("click", () => {
+			resetSelectionState();
+			setHashPage("page1");
+		});
+
+		pageIntro.addEventListener("click", () => {
+			setHashPage("page2");
+			showPage("page2");
+		});
+
+		window.addEventListener("hashchange", syncPageByHash);
+
+		createRoomButtons();
+		syncPageByHash();
+	</script>
+</body>
+</html>
