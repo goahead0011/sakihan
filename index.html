@@ -647,7 +647,28 @@
 			return 19;
 		}
 
-		function measureDateLabelWidth(label, baseFontSize) {
+		function getDateLayoutProfile() {
+			const isMobileViewport = window.matchMedia("(max-width: 760px)").matches;
+			if (!isMobileViewport) {
+				return {
+					fontBoost: 1,
+					spacingCompression: 1,
+					horizontalPadding: DATE_LAYOUT.horizontalPadding,
+					labelPadding: DATE_LAYOUT.labelPadding,
+					activeStatePadding: DATE_LAYOUT.activeStatePadding
+				};
+			}
+
+			return {
+				fontBoost: 1.2,
+				spacingCompression: 0.97,
+				horizontalPadding: 6,
+				labelPadding: 11,
+				activeStatePadding: 3
+			};
+		}
+
+		function measureDateLabelWidth(label, baseFontSize, profile) {
 			if (!dateMeasureContext) {
 				return 60;
 			}
@@ -658,11 +679,12 @@
 			dateMeasureContext.font = "700 " + baseFontSize + "px \"Helvetica\", \"Arial\", sans-serif";
 			const activeWidth = dateMeasureContext.measureText(label).width;
 
-			return Math.ceil(Math.max(regularWidth, activeWidth) + DATE_LAYOUT.labelPadding + DATE_LAYOUT.activeStatePadding);
+			return Math.ceil(Math.max(regularWidth, activeWidth) + profile.labelPadding + profile.activeStatePadding);
 		}
 
 		function getDateLayout(dateItems) {
-			const baseFontSize = getRoomDateBaseFontSize();
+			const layoutProfile = getDateLayoutProfile();
+			const baseFontSize = getRoomDateBaseFontSize() * layoutProfile.fontBoost;
 			const wrapWidth = Math.max(1, Math.floor(datesWrap.getBoundingClientRect().width));
 			let minX = Infinity;
 			let maxRight = -Infinity;
@@ -671,14 +693,15 @@
 
 			dateItems.forEach((item) => {
 				const label = item.text || item.label || "";
-				const labelWidth = measureDateLabelWidth(label, baseFontSize);
+				const labelWidth = measureDateLabelWidth(label, baseFontSize, layoutProfile);
+				const scaledX = item.x * layoutProfile.spacingCompression;
 				labelWidthsById[item.id] = labelWidth;
 
-				if (item.x < minX) {
-					minX = item.x;
+				if (scaledX < minX) {
+					minX = scaledX;
 				}
 
-				const rightEdge = item.x + labelWidth;
+				const rightEdge = scaledX + labelWidth;
 				if (rightEdge > maxRight) {
 					maxRight = rightEdge;
 				}
@@ -690,7 +713,7 @@
 
 			const contentWidth =
 				(maxRight - minX) +
-				(DATE_LAYOUT.horizontalPadding * 2);
+				(layoutProfile.horizontalPadding * 2);
 			const scale = Math.min(1, wrapWidth / contentWidth);
 			const canvasWidth = Math.ceil(contentWidth * scale);
 			const centerOffset = Math.max(0, Math.floor((wrapWidth - canvasWidth) / 2));
@@ -699,6 +722,8 @@
 				baseFontSize,
 				scale,
 				minX,
+				spacingCompression: layoutProfile.spacingCompression,
+				horizontalPadding: layoutProfile.horizontalPadding,
 				centerOffset,
 				labelWidthsById,
 				canvasWidth,
@@ -724,8 +749,9 @@
 				dateBtn.className = "date-btn";
 				dateBtn.textContent = item.text || item.label;
 				dateBtn.dataset.dateId = item.id;
+				const scaledX = item.x * layout.spacingCompression;
 				dateBtn.style.left =
-					((item.x - layout.minX + DATE_LAYOUT.horizontalPadding) * layout.scale) + "px";
+					((scaledX - layout.minX + layout.horizontalPadding) * layout.scale) + "px";
 				dateBtn.style.top = (item.y * layout.scale) + "px";
 				dateBtn.style.fontSize = (layout.baseFontSize * layout.scale) + "px";
 				dateBtn.style.minWidth = (layout.labelWidthsById[item.id] * layout.scale) + "px";
