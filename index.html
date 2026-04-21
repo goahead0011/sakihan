@@ -3,11 +3,28 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+	<meta http-equiv="Pragma" content="no-cache">
+	<meta http-equiv="Expires" content="0">
 	<title>Saki</title>
 	<link rel="preconnect" href="https://fonts.googleapis.com">
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 	<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400&display=swap" rel="stylesheet">
-	<link rel="stylesheet" href="./style.css">
+	<link id="app-style" rel="stylesheet" href="./style.css">
+	<script>
+		(() => {
+			const versionSource = document.lastModified && document.lastModified.trim().length
+				? document.lastModified
+				: String(Date.now());
+			const assetVersion = encodeURIComponent(versionSource);
+			window.__ASSET_VERSION__ = assetVersion;
+
+			const appStyle = document.getElementById("app-style");
+			if (appStyle) {
+				appStyle.href = "./style.css?v=" + assetVersion;
+			}
+		})();
+	</script>
 </head>
 <body>
 	<main class="site">
@@ -38,6 +55,22 @@
 	</main>
 
 	<script>
+		const ASSET_VERSION = window.__ASSET_VERSION__ || encodeURIComponent(String(Date.now()));
+
+		function withAssetVersion(url) {
+			const rawUrl = String(url || "");
+			if (!rawUrl) {
+				return rawUrl;
+			}
+
+			const hashIndex = rawUrl.indexOf("#");
+			const hash = hashIndex >= 0 ? rawUrl.slice(hashIndex) : "";
+			const baseUrl = hashIndex >= 0 ? rawUrl.slice(0, hashIndex) : rawUrl;
+			const separator = baseUrl.includes("?") ? "&" : "?";
+
+			return baseUrl + separator + "v=" + ASSET_VERSION + hash;
+		}
+
 		const ROOM_DATA = {
 			garden: {
 				dates: [
@@ -452,6 +485,7 @@
 		const datesWrap = document.getElementById("dates-wrap");
 		const datesCanvas = document.getElementById("dates-canvas");
 		const mediaWrap = document.getElementById("media-wrap");
+		const heroImage = document.querySelector(".hero-slot img");
 		const page1 = document.getElementById("page-1");
 		const pageIntro = document.getElementById("page-intro");
 		const page2 = document.getElementById("page-2");
@@ -459,6 +493,11 @@
 		const toPage1Title = document.getElementById("to-page-1");
 		const introCopy = document.getElementById("intro-copy");
 		let mediaRevealObserver = null;
+
+		if (heroImage) {
+			const heroSrc = heroImage.getAttribute("src") || "";
+			heroImage.src = withAssetVersion(heroSrc);
+		}
 		const CAPTION_FIRST_MEDIA_IDS = new Set([
 			"g_1_15",
 			"g_1_13",
@@ -660,11 +699,11 @@
 			}
 
 			return {
-				fontBoost: 1.2,
-				spacingCompression: 0.97,
-				horizontalPadding: 6,
-				labelPadding: 11,
-				activeStatePadding: 3
+				fontBoost: 1.32,
+				spacingCompression: 0.93,
+				horizontalPadding: 5,
+				labelPadding: 9,
+				activeStatePadding: 2
 			};
 		}
 
@@ -883,7 +922,7 @@
 				slot.style.setProperty("--media-top", mediaData.image.top + "px");
 
 				const img = document.createElement("img");
-				img.src = mediaData.imageSrc;
+				img.src = withAssetVersion(mediaData.imageSrc);
 				img.alt = roomName + " " + dateLabel + " image";
 				img.loading = "lazy";
 				slot.appendChild(img);
